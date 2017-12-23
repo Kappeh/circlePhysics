@@ -4,6 +4,16 @@ let vec3 = function(x = 0, y = 0, z = 1)
 	this.y = y;
 	this.z = z;
 }
+vec3.prototype.copy = function()
+{
+	let result = new vec3();
+
+	result.x = this.x;
+	result.y = this.y;
+	result.z = this.z;
+
+	return result;
+}
 vec3.prototype.add = function(other)
 {
 	if(!(other instanceof vec3))

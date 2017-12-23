@@ -53,11 +53,11 @@ mat3.prototype.multiply = function(other)
 {
 	if(other instanceof mat3)
 	{
-		return this.multiplyMatrix(other)
+		return this.multiplyMatrix(other);
 	}
 	if(other instanceof vec3)
 	{
-		return this.multiplyVector(other)
+		return this.multiplyVector(other);
 	}
 	if(typeof other === 'number')
 	{
@@ -160,6 +160,7 @@ function getRotationR(theta)
 	result.values[1] = -Math.sin(theta);
 	result.values[3] = Math.sin(theta);
 	result.values[4] = Math.cos(theta);
+	result.values[8] = 1;
 
 	return result;
 }
@@ -172,6 +173,7 @@ function getRotationD(theta)
 	result.values[1] = -Math.sin(phi);
 	result.values[3] = Math.sin(phi);
 	result.values[4] = Math.cos(phi);
+	result.values[8] = 1;
 
 	return result;
 }

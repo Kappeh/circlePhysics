@@ -38,7 +38,21 @@ Circle.prototype.update = function()
 }
 Circle.prototype.draw = function()
 {
+	ctx.fillStyle = "#ffffff";
+
 	ctx.beginPath();
 	ctx.arc(this.pos.x, this.pos.y, this.r, 0, Math.PI * 2);
 	ctx.fill();
+
+	if(DEBUG_LINES)
+	{
+		ctx.lineWidth = 2;
+		ctx.strokeStyle = "#ff0000";
+
+		ctx.beginPath();
+		ctx.moveTo(this.pos.x, this.pos.y);
+		ctx.lineTo(this.pos.x + this.vel.x * 10, this.pos.y + this.vel.y * 10);
+		ctx.stroke();
+	}
+
 }

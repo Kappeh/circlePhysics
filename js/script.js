@@ -3,15 +3,17 @@
 const WIDTH = 800;
 const HEIGHT = 800;
 
-const NUM_CIRCLES = 10;
+const NUM_CIRCLES = 5;
 const GRAVITY = new vec3(0, 2, 0);
 const E = 0.8;
 
-const MIN_RADIUS = 10;
+const MIN_RADIUS = 50;
 const MAX_RADIUS = 50;
 
-const MIN_VEL = 1;
-const MAX_VEL = 0;
+const MIN_VEL = 0;
+const MAX_VEL = 10;
+
+const DEBUG_LINES = false;
 
 // Code
 
@@ -22,6 +24,7 @@ canvas.height = HEIGHT;
 let ctx = canvas.getContext("2d");
 
 let circles = [];
+
 for(let i = 0; i < NUM_CIRCLES; i++)
 {
 	let r = Math.random() * (MAX_RADIUS - MIN_RADIUS) + MIN_RADIUS;
@@ -44,9 +47,13 @@ function draw()
 
 	for(let i = 0; i < circles.length; i++)
 	{
-		ctx.fillStyle = "#ffffff";
 		circles[i].update();
-		detectCollisions();
+	}
+
+	detectCollisions();
+
+	for(let i = 0; i < circles.length; i++)
+	{
 		circles[i].draw();
 	}
 
@@ -56,6 +63,8 @@ requestAnimationFrame(draw);
 
 function detectCollisions()
 {
+	let collision = false;
+
 	for(let i = 0; i < circles.length - 1; i++)
 	{
 		for(let j = i + 1; j < circles.length; j++)	
@@ -66,41 +75,44 @@ function detectCollisions()
 			if(distance < totalRadii)
 			{
 				// Collision
-				collisionResponse(circles[i], circles[j]);
+				collisionResponse(i, j);
+				collision = true;
 			}
 		}
 	}
+
+	return collision;
 }
 
-function collisionResponse(circle0, circle1)
+function collisionResponse(index1, index2)
 {
 	// Finding useful numbers and vectors
 
-	let scalar = circle0.r / (circle0.r + circle1.r);
-	let directionVector = circle1.pos.subtract(circle0.pos);
-	let collisionPoint = circle0.pos.add(directionVector.multiply(scalar));
+	let scalar = circles[index1].r / (circles[index1].r + circles[index2].r);
+	let directionVector = circles[index2].pos.subtract(circles[index1].pos);
+	let collisionPoint = circles[index1].pos.add(directionVector.multiply(scalar));
 	let unitVector = directionVector.multiply(1 / directionVector.abs());
 	let theta = Math.atan(directionVector.y / directionVector.x);
 
 	// Setting new positions of circles so that they do not intersect
 
-	circle0.pos = collisionPoint.add(unitVector.multiply(-circle0.r));
-	circle1.pos = collisionPoint.add(unitVector.multiply(circle1.r));
+	circles[index1].pos = collisionPoint.add(unitVector.multiply(-circles[index1].r));
+	circles[index2].pos = collisionPoint.add(unitVector.multiply(circles[index2].r));
 
 	// Calculating new velocities
 
 	let rotationMatrix = getRotationR(theta);
-	let u0 = rotationMatrix.multiply(circle0.vel);
-	let u1 = rotationMatrix.multiply(circle1.vel);
+	let u0 = rotationMatrix.multiply(circles[index1].vel);
+	let u1 = rotationMatrix.multiply(circles[index2].vel);
 
-	let vx1 = (circle0.m * u0.x + circle1.m * u1.x + circle0.m * E * (u1.x - u0.x)) / (circle0.m + circle1.m);
+	let vx1 = (circles[index1].m * u0.x + circles[index2].m * u1.x + circles[index1].m * E * (u1.x - u0.x)) / (circles[index1].m + circles[index2].m);
 	let vx0 = E * (u0.x - u1.x) + vx1;
 
-	let v0 = new vec3(vx0, u0.y, 0);
-	let v1 = new vec3(vx1, u1.y, 0);
+	let v0 = new vec3(vx1, u0.y, 0);
+	let v1 = new vec3(vx0, u1.y, 0);
 
 	rotationMatrix = getRotationR(-theta);
 
-	circle0.vel = rotationMatrix.multiply(v0);
-	circle1.vel = rotationMatrix.multiply(v1);
+	circles[index1].vel = rotationMatrix.multiply(v0);
+	circles[index2].vel = rotationMatrix.multiply(v1);
 }
